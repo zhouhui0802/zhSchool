@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @ApiModel(value = "全局统一返回结果")
-public class Result {
+public class Result<T> {
 
     @ApiModelProperty(value = "返回码")
     private Integer code;
