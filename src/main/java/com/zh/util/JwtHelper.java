@@ -5,7 +5,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Date;
 
-public class JwHelper {
+public class JwtHelper {
 
     private static long tokenExpiration = 24*60*60*1000;
     private static String tokenSignKey = "123456";
@@ -46,6 +46,15 @@ public class JwHelper {
         return (Integer)(claims.get("userType"));
     }
 
+    //从token字符串获取userName
+    public static String getUserName(String token) {
+        if(StringUtils.isEmpty(token)) return "";
+        Jws<Claims> claimsJws
+                = Jwts.parser().setSigningKey(tokenSignKey).parseClaimsJws(token);
+        Claims claims = claimsJws.getBody();
+        return (String)claims.get("userName");
+    }
+
     //判断token是否有效
     public static boolean isExpiration(String token){
         try {
@@ -60,6 +69,25 @@ public class JwHelper {
             //过期出现异常，返回true
             return true;
         }
+    }
+
+    /**
+     * 刷新Token
+     * @param token
+     * @return
+     */
+    public String refreshToken(String token) {
+        String refreshedToken;
+        try {
+            final Claims claims = Jwts.parser()
+                    .setSigningKey(tokenSignKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+            refreshedToken = JwtHelper.createToken(getUserId(token), getUserType(token));
+        } catch (Exception e) {
+            refreshedToken = null;
+        }
+        return refreshedToken;
     }
 
 }
